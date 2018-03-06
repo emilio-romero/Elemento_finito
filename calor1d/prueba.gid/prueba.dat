@@ -1,0 +1,88 @@
+#===========================================
+# Archivo de datos para el problema de Calor 
+#===========================================
+#Datos del problema 
+#Problem_name
+prueba1d
+#Solver_type
+Conjugate_gradient
+#Tolerance 
+       1e-05
+#Max_steps
+10000
+#Malla 
+#Dimension 
+2
+#Nodos por elemento
+2
+#Numero de elementos 
+20
+#Listado de elementos 
+#Elemento Material node1 node2 ...
+1 1 21 20
+2 1 20 19
+3 1 19 18
+4 1 18 17
+5 1 17 16
+6 1 16 15
+7 1 15 14
+8 1 14 13
+9 1 13 12
+10 1 12 11
+11 1 11 10
+12 1 10 9
+13 1 9 8
+14 1 8 7
+15 1 7 6
+16 1 6 5
+17 1 5 4
+18 1 4 3
+19 1 3 2
+20 1 2 1
+
+#Nodos ###### 
+#Numero de nodos 
+21 
+#Listado de nodos 
+#Nodo x1 x2 ...
+1           10            0
+2          9.5            0
+3            9            0
+4          8.5            0
+5            8            0
+6          7.5            0
+7            7            0
+8          6.5            0
+9            6            0
+10          5.5            0
+11            5            0
+12          4.5            0
+13            4            0
+14          3.5            0
+15            3            0
+16          2.5            0
+17            2            0
+18          1.5            0
+19            1            0
+20          0.5            0
+21            0            0
+
+#Materiales 
+
+#Temperaturas
+#Numero de condiciones 
+2 
+#listado de condiciones 
+#Nodo Temperatura 
+1           10
+21            0
+#Flujo 
+#Numero de condiciones 
+0 
+#Listado de condiciones 
+#Elem Flux FaceNode1 FaceNode2
+#Termino fuente 
+#Numero de condiciones 
+0
+#Listado de condiciones
+#Element heat 
