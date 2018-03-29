@@ -1,4 +1,5 @@
 CFLAGS=-c -std=c99 -lm 
+CFLAGS1= -std=c99 -lm 
 EXEC=ejecutable 
 
 CPPS:=$(wildcard src/*.c)
@@ -8,7 +9,7 @@ OBJDIR:=obj
 all: bin/$(EXEC)
 
 bin/$(EXEC): $(OBJS) | bin
-	gcc -o $@ $(OBJS) -std=c99 -lm
+	gcc -o $@ $(OBJS) $(CFLAGS1)
 bin: 
 	mkdir -p $@
 

@@ -44,19 +44,44 @@ int **matrizConectividad(char *chivoin, int npe, int nelem){
   int **aux=(int**)malloc(nelem*sizeof(int*));
   for(int i=0;i<nelem;i++) aux[i]=(int*)malloc((1+npe)*sizeof(int));
 char buff[255];
-
+int *bufint; 
 FILE *f1=fopen(chivoin,"r");
 fgets(buff,255,f1);
 while(strcmp(buff,"#Elemento Material node1 node2 ...\n")!=0){
   fgets(buff,255,f1);
 }
 for(int i=0;i<nelem;i++){
+  fscanf(f1,"%d",&aux[i][0]);
   for(int j=0;j<(1+npe);j++){
-     fscanf(f1,"%d",&aux[i][j]);
+      fscanf(f1,"%d",&aux[i][j]);
      }
 }
 fclose(f1);
+return(aux);}
 
-
+double **matrizNodos(char *chivoin, int *nnodos, int dim){
+FILE *f1=fopen(chivoin,"r");
+char buff[255];
+int bufint; 
+double bufdbl; 
+while(strcmp(buff,"#Numero de nodos \n")!=0){
+  fgets(buff,255,f1);
+}
+fscanf(f1,"%d",nnodos);
+  double **aux=(double**)malloc(*nnodos*sizeof(double*));
+  for(int i=0;i<*nnodos;i++) aux[i]=(double*)malloc((dim)*sizeof(double));
+fgets(buff,255,f1); fgets(buff,255,f1);fgets(buff,255,f1);
+for(int i=0;i<*nnodos;i++){
+  fscanf(f1,"%lf",&aux[i][0]);
+  for(int j=0;j<dim;j++){
+      fscanf(f1,"%lf",&aux[i][j]);
+      if(dim==1){
+        bufdbl=aux[i][j];   
+        fscanf(f1,"%lf",&aux[i][j]);
+        aux[i][j]=bufdbl; 
+      }
+     }
+}
+fclose(f1);
 return(aux);}
 
