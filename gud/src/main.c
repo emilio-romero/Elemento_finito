@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lecturamalla.h"
-
+#include "algebralineal.h"
+#include "femgud.h"
 int main(int argc, char *argv[]){
+
 char ain[50], aout[50]; 
 getParams(argc,argv,ain,aout);
-
+elemento e1; 
 /*
 * Datos basicos 
 */
@@ -22,7 +24,12 @@ double **mn=matrizNodos(ain,&nnodos,dim);
 
 for(int i=0;i<5;i++)
   printf("%lf \n",mn[i][0]);
+printf("continuan...\n");
+
+e1.dim=dim; e1.npe=npe;
+//double **k=matrizRigidez(&e1,nnodos);
 printf("...........\n Se escribira el archivo: %s \n..............\n",aout);
+fabricarElemento(&e1);
 
 /*Liberacion de memoria*/
 printf("Liberando memoria... \n");
