@@ -147,6 +147,27 @@ int matriz_transponer(double **original, int nr, int nc, double **copia){
   }
 return(1);}
 
+/*
+ * Multiplica todos los elementos de la matriz A, por el escalar a 
+ */
+int matriz_escalar(double a,double **A, int nr, int nc, double **out){
+  for(int i=0;i<nr;++i){
+    for(int j=0;j<nc;++j){
+      out[i][j]=a*A[i][j];
+    }
+  }
+return(1);}
+
+/*
+ * Llena la matriz out de ceros 
+ */
+int matriz_ceros(int nr, int nc, double **out){
+  for(int i=0;i<nr;++i){
+    for(int j=0;j<nc;++j){
+      out[i][j]=0.0; 
+    }
+  }
+return(1);}
 
 /*
 * Calcula la norma 1 de una matriz 

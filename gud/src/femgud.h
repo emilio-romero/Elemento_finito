@@ -10,15 +10,20 @@ typedef struct{
   int npi1; //ni puta idea ? xD //Numeros de puntos de integracion direccion 1 1D 2D y 3D
   int npi2; //Numeros de puntos de integracion direccion 2 2D y 3D
   int npi3; //Numeros de puntos de integracion direccion 3 3D 
-  double *pi1; //Puntos de integracion direccion 1 
-  double *pi2; //Puntos de integracion direccion 2 
-  double *pi3; //Puntos de integracion direccion 3
-  double *wi1; //Pesos de integracion direccion 1 
-  void (*Ni)(double, double*); 
-  void (*dNi)(double, double*); 
+  double **pi; //Puntos de integracion   
+  double *wi; //Pesos de integracion
+  void (*Ni)(double*, double**); 
+  void (*dNi)(double*, double**); 
 } elemento;
 
 void fabricarElemento(elemento *me);
+//elementos
+void E1D2N(elemento *me);
+void E1D3N(elemento *me);
+void E2D3N(elemento *me);
+
+//Matrices de rigidez y esfuerzos
 double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN);
+void invJacobian(double **Jacobian, elemento *me,double *detJ ,double **invJ);
 
 #endif

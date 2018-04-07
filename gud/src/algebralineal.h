@@ -38,6 +38,8 @@ int matriz_suma(double **A, double **B, int nr, int nc, double **out);
 int matriz_resta(double **A, double **B, int nr, int nc, double **out);
 int matriz_copiar(double **original, int nr, int nc, double **copia);
 int matriz_transponer(double **original, int nr, int nc, double **copia);
+int matriz_escalar(double a, double **A, int nr, int nc, double **out);
+int matriz_ceros(int nr, int nc, double **out);
 //=========================
 //= Normas 
 //========================

@@ -18,19 +18,28 @@ printf("...........\n Se leera el archivo: %s \n..............\n",ain);
 datosMalla(ain,problem,solucionador,&tol,&maxiter,&dim,&npe,&nelem);
 
 int **mc=matrizConectividad(ain,npe,nelem);
-for(int i=0;i<5;i++)
-  printf("%d %d %d\n",mc[i][0],mc[i][1],mc[i][2]);
+for(int i=0;i<5;++i){
+  for(int j=0;j<npe+1;++j){
+    printf("%d ",mc[i][j]);}
+  printf("\n");}
 double **mn=matrizNodos(ain,&nnodos,dim);
 
-for(int i=0;i<5;i++)
-  printf("%lf \n",mn[i][0]);
+for(int i=0;i<5;i++){
+  for(int j=0;j<dim;++j){
+  printf("%lf ",mn[i][j]);}
+  printf("\n");}
 printf("continuan...\n");
 
 e1.dim=dim; e1.npe=npe;
-//double **k=matrizRigidez(&e1,nnodos);
 printf("...........\n Se escribira el archivo: %s \n..............\n",aout);
 fabricarElemento(&e1);
-
+printf("Se creo el elemento\n");
+double **k=matrizRigidez(&e1,nnodos,nelem,mc,mn);
+for(int i=0;i<nnodos;++i){
+  for(int j=0;j<nnodos;++j){
+    printf("%1.2lf ",k[i][j]);
+  } printf("\n");
+}
 /*Liberacion de memoria*/
 printf("Liberando memoria... \n");
 
