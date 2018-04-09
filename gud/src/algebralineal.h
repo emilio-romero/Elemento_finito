@@ -67,7 +67,8 @@ int solLU(double **A, double *n, int nr, int nc, double *out);
 int Chol(double **A, int n, double **out);
 int Cholesky(char *cfile, double**out);
 int solLL(double **A,double *b, int nr, int nc, double *out);
-
+/*Solucionadores iterarivos*/
+int GradienteConjugado(double **A, double *b, int nr, int nc,double tol,double *out);
 //=========================
 //= Minimos cuadrados
 //========================

@@ -9,4 +9,8 @@ void N1Dq(double *xi, double **out);
 void dN1Dq(double *xi, double **out); 
 void N2Dl(double *cni, double **out); 
 void dN2Dl(double *cni, double **out); 
+void N2Dq(double *cni, double **out); 
+void dN2Dq(double *cni, double **out); 
+void N3Dl(double *cni, double **out); 
+void dN3Dl(double *cni, double **out); 
 #endif 

@@ -84,4 +84,83 @@ for(int i=0;i<*nnodos;i++){
 }
 fclose(f1);
 return(aux);}
+double **matrizCondiciones(char *chivoin, int *ncond){
+FILE *f1=fopen(chivoin,"r");
+char buff[255]; 
+int bufint; 
+double bufdbl; 
+while(strcmp(buff,"#Numero de condiciones \n")!=0){
+  fgets(buff,255,f1);
+}
+fscanf(f1,"%d",ncond);
+if(*ncond==0) return(NULL); 
+  double **aux=(double**)malloc(*ncond*sizeof(double*));
+  for(int i=0;i<(*ncond);++i) aux[i]=(double*)malloc(2*sizeof(double));
+  fgets(buff,255,f1); fgets(buff,255,f1); fgets(buff,255,f1);
+  for(int i=0;i<(*ncond);++i){
+    fscanf(f1,"%lf",&aux[i][0]);
+    fscanf(f1,"%lf",&aux[i][1]);
+  }
+fclose(f1);
+return(aux);}
+double **matrizCondicionesF(char *chivoin, int *ncondf){
+FILE *f1=fopen(chivoin,"r");
+char buff[255]; 
+int bufint; 
+double bufdbl; 
+while(strcmp(buff,"#Flujo \n")!=0){
+  fgets(buff,255,f1);
+}
+fgets(buff,255,f1);
+fscanf(f1,"%d",ncondf);
+if(*ncondf==0) return(NULL); 
+  double **aux=(double**)malloc(*ncondf*sizeof(double*));
+  for(int i=0;i<(*ncondf);++i) aux[i]=(double*)malloc(3*sizeof(double));
+  fgets(buff,255,f1); fgets(buff,255,f1); fgets(buff,255,f1);
+  for(int i=0;i<(*ncondf);++i){
+    fscanf(f1,"%lf",&aux[i][0]);
+    fscanf(f1,"%lf",&aux[i][0]);
+    fscanf(f1,"%lf",&aux[i][1]);
+    fscanf(f1,"%lf",&aux[i][2]);
+  }
+fclose(f1);
+return(aux);}
+double **matrizMateriales(char *chivoin, int *nmat){
+FILE *f1=fopen(chivoin,"r");
+char buff[255]; 
+int bufint; 
+double bufdbl; 
+while(strcmp(buff,"#Numero de materiales \n")!=0){
+  fgets(buff,255,f1);
+}
+fscanf(f1,"%d",nmat);
+  double **aux=(double**)malloc(*nmat*sizeof(double*));
+  for(int i=0;i<(*nmat);++i) aux[i]=(double*)malloc(4*sizeof(double));
+  fgets(buff,255,f1); fgets(buff,255,f1); fgets(buff,255,f1);
+  for(int i=0;i<(*nmat);++i){
+    fscanf(f1,"%lf",&aux[i][0]);
+    fscanf(f1,"%lf",&aux[i][0]);
+    fscanf(f1,"%lf",&aux[i][1]);
+    fscanf(f1,"%lf",&aux[i][2]);
+    fscanf(f1,"%lf",&aux[i][3]);
+  }
+ fclose(f1);
+
+return(aux);}
+void resultados(char *problema,int nnodos, double *phi){
+  char archi[80]; 
+//  strcpy(archi,problema);
+//  strcat(archi,".post.res");
+  //printf("%s",archi);
+  FILE *f1=fopen(problema,"w");
+  file:///usr/share/applications/firefox.desktop
+  fprintf(f1,"GiD Post Result File 1.0\n \n");
+  fprintf(f1,"Result \"Temperature\" \"Calor\" 1 Scalar OnNodes\n");
+  fprintf(f1,"Values\n");
+  for(int i=0;i<nnodos;++i){
+    fprintf(f1,"%d %E\n",i+1,phi[i]);
+  }
+  fprintf(f1,"End Values\n");
+  fclose(f1);
+}
 

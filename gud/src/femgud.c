@@ -10,6 +10,12 @@ void fabricarElemento(elemento *me){
   if(me->dim==2 && me->npe==3){
     E2D3N(me); 
   }
+  if(me->dim==2 && me->npe==4){
+    E2D4N(me); 
+  }
+  if(me->dim==3 && me->npe==4){
+    E3D4N(me); 
+  }
 }
 /*Elemento 1D con dos nodos */
 void E1D2N(elemento *me){
@@ -42,7 +48,28 @@ void E2D3N(elemento *me){
   me->Ni=N2Dl;
   me->dNi=dN2Dl;
 }
-
+/*Elemento 2D de cuatro nodos*/
+void E2D4N(elemento *me){
+  me->npi1=4;
+  me->pi=crear_matriz(4,me->dim);
+  me->wi=crear_vector(4);
+  me->pi[0][0]=-0.5773502692; me->pi[0][1]=-0.5773502692;
+  me->pi[1][0]=0.5773502692; me->pi[1][1]=-0.5773502692;
+  me->pi[2][0]=0.5773502692; me->pi[2][1]=0.5773502692;
+  me->pi[3][0]=-0.5773502692; me->pi[3][1]=0.5773502692;
+  me->wi[0]=me->wi[1]=me->wi[2]=me->wi[3]=1.0; 
+  me->Ni=N2Dq; 
+  me->dNi=dN2Dq;
+}
+void E3D4N(elemento *me){
+  me->npi1=1; 
+  me->pi=crear_matriz(1,me->dim);
+  me->wi=crear_vector(1);
+  me->pi[0][0]=0.25;me->pi[0][1]=0.25;me->pi[0][2]=0.25;
+  me->wi[0]=1.0; 
+  me->Ni=N3Dl;
+  me->dNi=dN3Dl;
+}
 /*Calculo de la matriz de rigidez*/
 /* Ciclo sobre elementos
  * 1.- Obtener el elemento y las coordenadas del elemento //listo 
@@ -58,8 +85,11 @@ void E2D3N(elemento *me){
  * Cierra ciclo sobre elementos
  *
  */
-double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN){
+double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN,double **Mat,
+    int ncond, double **cond,int ncondf,double **condf, double *f){
   double **K=crear_matriz(nnodos,nnodos);
+  double **Nt=crear_matriz(me->npe,1);// Derivadas naturales
+  double **N=crear_matriz(1,me->npe);// Derivadas naturales
   double **dn=crear_matriz(me->dim,me->npe);// Derivadas naturales
   double **ke=crear_matriz(me->npe, me->npe); //Matriz elemental
   double **aux1=crear_matriz(me->dim, me->npe); //Matriz elemental
@@ -68,10 +98,11 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
   double detj;//determinante del jacobiano 
   double **invj=crear_matriz(me->dim,me->dim); //Inversa del jacobiano
   double **cci=crear_matriz(me->dim,me->npe);//Coordenadas cartesianas del elemento
-  int nodo_actual,e1,e2; 
+  int nodo_actual,e1,e2,tmat; 
   double **B=crear_matriz(me->dim,me->npe);
   double **Bt=crear_matriz(me->npe,me->dim);
   double **D=crear_matriz(me->dim,me->dim);
+  double Q; 
   for(int ele=0;ele<nelem;++ele){
   //printf("llegas aca?\n");
   //Coordenadas cartesianas del elemento en matriz de dimxnpe
@@ -83,13 +114,15 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
       }
     }
    // printf("\n");//junto con cci[j][i]
-   // Propiedades del material 
+   // Propiedades del material
+    tmat=MC[ele][0]-1; 
     for(int i=0;i<me->dim;++i){
-      D[i][i]=1000.0; //Cambiar por la propiedad correspondiente al elemento
+      D[i][i]=Mat[tmat][i]; //Cambiar por la propiedad correspondiente al elemento
     }
-
+    Q=Mat[tmat][3]; 
     for(int p=0;p<me->npi1;++p){
       me->dNi(me->pi[p],dn);//Corregir los puntos de integracion que recibe
+      me->Ni(me->pi[p],N);
       //Calculo del Jacobiano
       for(int j=0;j<me->dim;j++){
        //..... me la voy a pelar 
@@ -103,22 +136,27 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
       //Fin del calculo del determinante
       //Calculo de B 
       matriz_mul(invj,dn,me->dim,me->dim,me->npe,B);
-      matriz_transponer(B,me->npe,me->dim,Bt);
+      matriz_transponer(B,me->npe,me->dim,Bt);// 
       matriz_mul(D,B,me->dim,me->dim,me->npe,aux1);
       matriz_mul(Bt,aux1,me->npe,me->dim,me->npe,aux2);
       matriz_escalar(me->wi[p]*detj,aux2,me->npe,me->npe,aux2);
       matriz_suma(aux2,ke,me->npe,me->npe,ke);
+      //Calculo de f
+      matriz_escalar(Q*detj*me->wi[p],N,1,me->npe,N);
     }
     //
     //Ensamblaje de la matriz global 
     for(int i=0;i<me->npe;++i){
+      e1=MC[ele][i+1];
       for(int j=0;j<me->npe;++j){
-        e1=MC[ele][i+1]; e2=MC[ele][j+1]; 
+        e2=MC[ele][j+1]; 
         K[e1-1][e2-1]+=ke[i][j];
       }
+      f[e1-1]+=N[0][i];
     }
     matriz_ceros(me->npe,me->npe,ke);
   }
+  condicionesFrontera(K,f,ncond,cond,ncondf,condf,nnodos,me);
 liberar_matriz(dn,me->dim);
 liberar_matriz(cci,me->dim);
 liberar_matriz(ke,me->npe);
@@ -129,13 +167,39 @@ liberar_matriz(Bt,me->npe);
 liberar_matriz(D,me->dim);
 liberar_matriz(aux1,me->dim);
 liberar_matriz(aux2,me->npe);
+liberar_matriz(N,1);
+liberar_matriz(Nt,me->npe);
   return(K);
 }
+
+
+void condicionesFrontera(double **K, double *f,int ncond ,double **cond,int ncondf, 
+    double **condf,int nnodos, elemento *me){
+  int nodo_actual; 
+  int n1,n2; 
+  for(int e=0;e<ncond;++e){
+    nodo_actual=(int)cond[e][0]-1;
+    for(int i=0;i<nnodos;++i){
+      if(fabs(K[i][nodo_actual])>0 && i!=nodo_actual){
+        f[i]=f[i]-K[i][nodo_actual]*cond[e][1];
+        K[i][nodo_actual]=K[nodo_actual][i]=0.0;
+      } 
+    }
+    K[nodo_actual][nodo_actual]=1.0; 
+    f[nodo_actual]=cond[e][1]; 
+  } 
+  for(int c=0;c<ncondf;++c){
+    n1=(int)condf[c][1]-1; n2=(int)condf[c][2]-1; 
+    f[n1]+=condf[c][0];
+    f[n2]+=condf[c][0];
+  }
+}
+
 
 void invJacobian(double **Jacobian,elemento *me,double *detJ ,double **invJ){
   if(me->dim==1){
     *detJ=Jacobian[0][0]; 
-    invJ[0][0]=Jacobian[0][0]; 
+    invJ[0][0]=1/Jacobian[0][0]; 
   }
   else if(me->dim==2){
     *detJ=Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0]; 

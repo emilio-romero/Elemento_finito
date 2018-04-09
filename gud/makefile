@@ -1,6 +1,6 @@
 CFLAGS=-c -std=c99 -lm 
 CFLAGS1= -std=c99 -lm 
-EXEC=ejecutable 
+EXEC=Calor.bin 
 
 CPPS:=$(wildcard src/*.c)
 OBJS:=$(patsubst src/%.c,obj/%.o,$(CPPS))

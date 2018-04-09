@@ -21,9 +21,13 @@ void fabricarElemento(elemento *me);
 void E1D2N(elemento *me);
 void E1D3N(elemento *me);
 void E2D3N(elemento *me);
-
+void E2D4N(elemento *me);
+void E3D4N(elemento *me);
 //Matrices de rigidez y esfuerzos
-double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN);
+double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN,double **Mat,
+    int ncond, double **cond,int ncondf, double **condf ,double *f);
+void condicionesFrontera(double **K, double *f,int ncond, double**cond,int ncondf,  
+    double **condf,int nnodos,elemento *me);
 void invJacobian(double **Jacobian, elemento *me,double *detJ ,double **invJ);
 
 #endif

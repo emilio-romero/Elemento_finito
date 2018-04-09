@@ -459,6 +459,38 @@ int solLL(double **A,double *b, int nr, int nc,double *out){
 return(1);}
 
 
+/*
+ * Gradiente conjugado
+ *
+ */
+int GradienteConjugado(double **A, double *b, int nr, int nc,double tol,double *out){
+  double *r=crear_vector(nr);
+  double *p=crear_vector(nr);
+  double *q=crear_vector(nr);
+  double err,dk,ak,bk; 
+  for(int i=0;i<nr;++i){
+    r[i]=b[i]; 
+    p[i]=b[i];
+  }
+  err=sqrt(punto(r,r,nr)/(double)nr);
+  for(int k=0;k<nr;++k){
+    matriz_vector_mul(A,p,nr,nr,q);
+    dk=punto(r,r,nr);
+    ak=dk/(punto(p,q,nr));
+    for(int i=0;i<nr;++i){
+      out[i]=out[i]+ak*p[i];
+      r[i]=r[i]-ak*q[i];
+    }
+    bk=punto(r,r,nr);
+    for(int i=0;i<nr;++i){
+      p[i]=r[i]+bk*p[i]; 
+    }
+    err=sqrt(punto(r,r,nr)/(double)nr);
+    if(err<tol) break; 
+  }
+  free(r); free(p); free(q);
+return(1);}
+
 
 /*
 * Minimos cuadrados 

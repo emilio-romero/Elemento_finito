@@ -13,46 +13,49 @@ elemento e1;
 */
 char problem[50], solucionador[30]; 
 double tol; 
-int maxiter, dim, npe, nelem,nnodos; 
+int maxiter, dim, npe, nelem,nnodos,ncond,nmat; 
 printf("...........\n Se leera el archivo: %s \n..............\n",ain);
 datosMalla(ain,problem,solucionador,&tol,&maxiter,&dim,&npe,&nelem);
 
 int **mc=matrizConectividad(ain,npe,nelem);
-for(int i=0;i<5;++i){
-  for(int j=0;j<npe+1;++j){
-    printf("%d ",mc[i][j]);}
-  printf("\n");}
+  printf("Se leyo matriz de conectividad...\n");
 double **mn=matrizNodos(ain,&nnodos,dim);
-
-for(int i=0;i<5;i++){
-  for(int j=0;j<dim;++j){
-  printf("%lf ",mn[i][j]);}
-  printf("\n");}
-printf("continuan...\n");
-
+  printf("Se leyo matriz de nodos...\n");
+double **mat=matrizMateriales(ain,&nmat); 
+  printf("Se leyo matriz de materiales...\n");
+double **cond=matrizCondiciones(ain,&ncond);
+int ncondf; 
+double **condf=matrizCondicionesF(ain,&ncondf);
+  printf("Se leyeron condiciones de frontera...\n");
 e1.dim=dim; e1.npe=npe;
-printf("...........\n Se escribira el archivo: %s \n..............\n",aout);
+
 fabricarElemento(&e1);
-printf("Se creo el elemento\n");
-double **k=matrizRigidez(&e1,nnodos,nelem,mc,mn);
-for(int i=0;i<nnodos;++i){
-  for(int j=0;j<nnodos;++j){
-    printf("%1.2lf ",k[i][j]);
-  } printf("\n");
+printf("Se creo el elemento...\n");
+
+double *f=crear_vector(nnodos);
+double **k=matrizRigidez(&e1,nnodos,nelem,mc,mn,mat,ncond,cond,ncondf,condf,f);
+printf("Se crearon la matriz de rigidez y el vector de esfuerzos...\n");
+double *phi=crear_vector(nnodos);
+
+printf("Se empezara la solucion del problema\n");
+if(strcmp(solucionador,"Conjugate_gradient")==0){
+  printf("Resolvere con CG\n");
+  GradienteConjugado(k,f,nnodos,nnodos,tol,phi);
+}else{
+  printf("Resolvere con Cholesky\n"); 
+  solLL(k,f,nnodos,nnodos,phi);
 }
+
+printf("...........\n Se escribira el archivo: %s \n..............\n",aout);
+resultados(aout,nnodos,phi);
 /*Liberacion de memoria*/
 printf("Liberando memoria... \n");
-
-for(int i=0;i<nelem;i++){
-  free(mc[i]);
-}
+for(int i=0;i<nelem;++i) free(mc[i]); 
 free(mc);
-
-for(int i=0;i<nnodos;i++){
-  free(mn[i]);
-}
-free(mn);
-
+liberar_matriz(mn,nnodos);
+liberar_matriz(mat,nmat);
+liberar_matriz(cond,ncond);
+free(phi);
 printf("Listo!\n");
 
 printf("Gracias por usar gud!\nThanks for using gud!\n");
