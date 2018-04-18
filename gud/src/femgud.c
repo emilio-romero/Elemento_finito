@@ -207,7 +207,23 @@ void invJacobian(double **Jacobian,elemento *me,double *detJ ,double **invJ){
     invJ[1][0]=-Jacobian[1][0]/(*detJ); invJ[1][1]=Jacobian[0][0]/(*detJ);
   }
   else if(me->dim==3){
-  
+    *detJ=Jacobian[0][0] * Jacobian[1][1]*Jacobian[2][2] - Jacobian[0][2] * Jacobian[1][1]*Jacobian[2][0];
+    *detJ=*detJ+Jacobian[0][1]*Jacobian[1][2]*Jacobian[2][0];
+    *detJ=*detJ+Jacobian[0][2]*Jacobian[1][0]*Jacobian[2][1];
+    *detJ=*detJ-Jacobian[0][0]*Jacobian[1][2]*Jacobian[2][1];
+    *detJ=*detJ-Jacobian[0][1]*Jacobian[1][0]*Jacobian[2][2];
+
+    invJ[0][0]=(Jacobian[2][2]*Jacobian[1][1]-Jacobian[2][1]*Jacobian[1][2])/(*detJ);
+    invJ[0][1]=-(Jacobian[2][2]*Jacobian[0][1]-Jacobian[2][1]*Jacobian[0][2])/(*detJ);
+    invJ[0][2]=(Jacobian[1][2]*Jacobian[0][1]-Jacobian[1][1]*Jacobian[0][2])/(*detJ);
+
+    invJ[1][0]=-(Jacobian[2][2]*Jacobian[1][0]-Jacobian[2][0]*Jacobian[1][2])/(*detJ);
+    invJ[1][1]=(Jacobian[2][2]*Jacobian[0][0]-Jacobian[2][0]*Jacobian[0][2])/(*detJ);
+    invJ[1][2]=-(Jacobian[1][2]*Jacobian[0][0]-Jacobian[1][0]*Jacobian[0][2])/(*detJ);
+    
+    invJ[2][0]=(Jacobian[2][1]*Jacobian[1][0]-Jacobian[2][0]*Jacobian[1][1])/(*detJ);
+    invJ[2][1]=-(Jacobian[2][1]*Jacobian[0][0]-Jacobian[2][0]*Jacobian[0][1])/(*detJ);
+    invJ[2][2]=(Jacobian[1][1]*Jacobian[0][0]-Jacobian[1][0]*Jacobian[0][1])/(*detJ);
   }
 
 }
