@@ -26,6 +26,7 @@ void E3D4N(elemento *me);
 //Matrices de rigidez y esfuerzos
 double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN,double **Mat,
     int ncond, double **cond,int ncondf, double **condf ,double *f);
+int calcularB(elemento *me, int pi_actual, double **cci, double *detj,double **B);
 void condicionesFrontera(double **K, double *f,int ncond, double**cond,int ncondf,  
     double **condf,int nnodos,elemento *me);
 void invJacobian(double **Jacobian, elemento *me,double *detJ ,double **invJ);

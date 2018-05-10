@@ -125,7 +125,6 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
       me->Ni(me->pi[p],N);
       //Calculo del Jacobiano
       for(int j=0;j<me->dim;j++){
-       //..... me la voy a pelar 
         for(int i=0;i<me->dim;i++){
           jacobiano[i][j]=punto(dn[i],cci[j],me->npe);
         }
@@ -136,6 +135,7 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
       //Fin del calculo del determinante
       //Calculo de B 
       matriz_mul(invj,dn,me->dim,me->dim,me->npe,B);
+      calcularB(me,p,cci,&detj,B);
       matriz_transponer(B,me->npe,me->dim,Bt);// 
       matriz_mul(D,B,me->dim,me->dim,me->npe,aux1);
       matriz_mul(Bt,aux1,me->npe,me->dim,me->npe,aux2);
@@ -172,6 +172,23 @@ liberar_matriz(Nt,me->npe);
   return(K);
 }
 
+int calcularB(elemento *me,int pi_actual,double **cci,double *detj,double **B){
+  double **dn=crear_matriz(me->dim,me->npe);// Derivadas naturales
+  double **jacobiano=crear_matriz(me->dim, me->dim);//Jacobiano
+  double **invj=crear_matriz(me->dim,me->dim); //Inversa del jacobiano
+  me->dNi(me->pi[pi_actual],dn);//Corregir los puntos de integracion que recibe
+  //Calculo del Jacobiano
+  for(int j=0;j<me->dim;j++){
+    for(int i=0;i<me->dim;i++){
+      jacobiano[i][j]=punto(dn[i],cci[j],me->npe);
+    }
+  }
+  invJacobian(jacobiano,me,detj,invj);
+  matriz_mul(invj,dn,me->dim,me->dim,me->npe,B); 
+  liberar_matriz(jacobiano,me->dim);
+  liberar_matriz(invj,me->dim);
+  liberar_matriz(dn,me->dim);
+return(1);}
 
 void condicionesFrontera(double **K, double *f,int ncond ,double **cond,int ncondf, 
     double **condf,int nnodos, elemento *me){
