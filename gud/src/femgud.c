@@ -90,13 +90,10 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
   double **K=crear_matriz(nnodos,nnodos);
   double **Nt=crear_matriz(me->npe,1);// Derivadas naturales
   double **N=crear_matriz(1,me->npe);// Derivadas naturales
-  double **dn=crear_matriz(me->dim,me->npe);// Derivadas naturales
   double **ke=crear_matriz(me->npe, me->npe); //Matriz elemental
   double **aux1=crear_matriz(me->dim, me->npe); //Matriz elemental
   double **aux2=crear_matriz(me->npe, me->npe); //Matriz elemental
-  double **jacobiano=crear_matriz(me->dim, me->dim);//Jacobiano
   double detj;//determinante del jacobiano 
-  double **invj=crear_matriz(me->dim,me->dim); //Inversa del jacobiano
   double **cci=crear_matriz(me->dim,me->npe);//Coordenadas cartesianas del elemento
   int nodo_actual,e1,e2,tmat; 
   double **B=crear_matriz(me->dim,me->npe);
@@ -121,20 +118,8 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
     }
     Q=Mat[tmat][3]; 
     for(int p=0;p<me->npi1;++p){
-      me->dNi(me->pi[p],dn);//Corregir los puntos de integracion que recibe
       me->Ni(me->pi[p],N);
-      //Calculo del Jacobiano
-      for(int j=0;j<me->dim;j++){
-        for(int i=0;i<me->dim;i++){
-          jacobiano[i][j]=punto(dn[i],cci[j],me->npe);
-        }
-      }
-      //Fin calculo del Jacobiano
-      //Calculo del determinante y la inversa del determinante
-      invJacobian(jacobiano,me,&detj,invj);
-      //Fin del calculo del determinante
       //Calculo de B 
-      matriz_mul(invj,dn,me->dim,me->dim,me->npe,B);
       calcularB(me,p,cci,&detj,B);
       matriz_transponer(B,me->npe,me->dim,Bt);// 
       matriz_mul(D,B,me->dim,me->dim,me->npe,aux1);
@@ -157,11 +142,8 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
     matriz_ceros(me->npe,me->npe,ke);
   }
   condicionesFrontera(K,f,ncond,cond,ncondf,condf,nnodos,me);
-liberar_matriz(dn,me->dim);
 liberar_matriz(cci,me->dim);
 liberar_matriz(ke,me->npe);
-liberar_matriz(jacobiano,me->dim);
-liberar_matriz(invj,me->dim);
 liberar_matriz(B,me->dim);
 liberar_matriz(Bt,me->npe);
 liberar_matriz(D,me->dim);
@@ -183,8 +165,10 @@ int calcularB(elemento *me,int pi_actual,double **cci,double *detj,double **B){
       jacobiano[i][j]=punto(dn[i],cci[j],me->npe);
     }
   }
+  //Fin del calculo del jacobiano
+  //Calculo de la inversa y determinante del jacobiano
   invJacobian(jacobiano,me,detj,invj);
-  matriz_mul(invj,dn,me->dim,me->dim,me->npe,B); 
+  matriz_mul(invj,dn,me->dim,me->dim,me->npe,B); //Calculo de B
   liberar_matriz(jacobiano,me->dim);
   liberar_matriz(invj,me->dim);
   liberar_matriz(dn,me->dim);
@@ -244,4 +228,10 @@ void invJacobian(double **Jacobian,elemento *me,double *detJ ,double **invJ){
   }
 
 }
-  
+ 
+
+int calcularFlujos(){
+
+
+return(1);}
+
