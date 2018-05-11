@@ -147,8 +147,10 @@ fscanf(f1,"%d",nmat);
  fclose(f1);
 
 return(aux);}
-void resultados(char *problema,int nnodos, double *phi){
-  char archi[80]; 
+void resultados(char *problema,int nnodos, double *phi, int npi,int nelem,int pdim,int npe,
+    double **Flujos){
+  char archi[80];
+  char tipo_elemento[30];
 //  strcpy(archi,problema);
 //  strcat(archi,".post.res");
   //printf("%s",archi);
@@ -159,6 +161,36 @@ void resultados(char *problema,int nnodos, double *phi){
   fprintf(f1,"Values\n");
   for(int i=0;i<nnodos;++i){
     fprintf(f1,"%d %E\n",i+1,phi[i]);
+  }
+  fprintf(f1,"End Values\n");
+  if(pdim==1){
+    strcpy(tipo_elemento,"Linear");  
+  }
+  else if(pdim==2){
+    if(npe==3) strcpy(tipo_elemento,"Triangle"); 
+    if(npe==4) strcpy(tipo_elemento,"Quadrilateral"); 
+  }
+  else if(pdim==3){
+    strcpy(tipo_elemento,"Tetrahedra");
+  }
+  else{
+    printf("Too many dimensions");
+  }
+  fprintf(f1,"GaussPoints \"Gauss internal\" ElemType %s \n",tipo_elemento);
+  fprintf(f1,"Number Of Gauss Points: %d\n",npi);
+  fprintf(f1,"Natural Coordinates: internal\nend gausspoints\n");
+  
+  fprintf(f1,"\nResult \"Flux\" \"Calor\" 1 Vector OnGaussPoints \"Gauss internal\"\n");
+  fprintf(f1,"Values\n");
+  for(int i=0;i<nelem;++i){
+    fprintf(f1,"%d",i+1);
+    for(int p=0;p<npi;++p){
+      fprintf(f1,"   ");
+      for(int j=0;j<pdim;++j){
+        fprintf(f1,"%E ",Flujos[i*npi+p][j]);
+      }
+      fprintf(f1,"\n");
+    }
   }
   fprintf(f1,"End Values\n");
   fclose(f1);

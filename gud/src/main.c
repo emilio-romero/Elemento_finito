@@ -45,9 +45,11 @@ if(strcmp(solucionador,"Conjugate_gradient")==0){
   printf("Resolvere con Cholesky\n"); 
   solLL(k,f,nnodos,nnodos,phi);
 }
-
+double **Flux=crear_matriz(nelem*e1.npi1,e1.dim);
+printf("Se calcularan los flujos\n");
+calcularFlujos(&e1,nnodos,nelem,mc,mn,mat,phi,Flux);
 printf("...........\n Se escribira el archivo: %s \n..............\n",aout);
-resultados(aout,nnodos,phi);
+resultados(aout,nnodos,phi,e1.npi1,nelem,e1.dim,e1.npe,Flux);
 /*Liberacion de memoria*/
 printf("Liberando memoria... \n");
 for(int i=0;i<nelem;++i) free(mc[i]); 
@@ -55,6 +57,7 @@ free(mc);
 liberar_matriz(mn,nnodos);
 liberar_matriz(mat,nmat);
 liberar_matriz(cond,ncond);
+liberar_matriz(Flux,nelem*e1.npi1);
 free(phi);
 printf("Listo!\n");
 

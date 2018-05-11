@@ -12,6 +12,7 @@ double **matrizNodos(char *chivoin, int *nnodos, int dim);
 double **matrizCondiciones(char *chivoin, int *ncond);
 double **matrizCondicionesF(char *chivoin, int *ncondf);
 double **matrizMateriales(char *chivoin, int *nmat);
-void resultados(char *problema,int nnodos, double *phi);
+void resultados(char *problema,int nnodos, double *phi, int npi, int nelem, int pdim,int npe,
+    double **Flujos);
 
 #endif 

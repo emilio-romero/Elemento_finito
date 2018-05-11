@@ -30,5 +30,6 @@ int calcularB(elemento *me, int pi_actual, double **cci, double *detj,double **B
 void condicionesFrontera(double **K, double *f,int ncond, double**cond,int ncondf,  
     double **condf,int nnodos,elemento *me);
 void invJacobian(double **Jacobian, elemento *me,double *detJ ,double **invJ);
-
+int calcularFlujos(elemento *me, int nnodos, int nelem, int **MC, double **MN, double **Mat,
+    double *Temperatura, double **Flujos);
 #endif

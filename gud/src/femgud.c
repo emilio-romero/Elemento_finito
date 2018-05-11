@@ -101,7 +101,6 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
   double **D=crear_matriz(me->dim,me->dim);
   double Q; 
   for(int ele=0;ele<nelem;++ele){
-  //printf("llegas aca?\n");
   //Coordenadas cartesianas del elemento en matriz de dimxnpe
     for(int i=0;i<me->npe;++i){
       for(int j=0;j<me->dim;++j){
@@ -230,8 +229,43 @@ void invJacobian(double **Jacobian,elemento *me,double *detJ ,double **invJ){
 }
  
 
-int calcularFlujos(){
-
-
+int calcularFlujos(elemento *me,int nnodos, int nelem,int **MC, double **MN,double **Mat,
+    double *Temperatura,double **Flujos){
+int nodo_actual,tmat; 
+double **cci=crear_matriz(me->dim,me->npe);
+double **D=crear_matriz(me->dim,me->dim);
+double **B=crear_matriz(me->dim,me->npe);
+double *temp_elemento=crear_vector(me->npe);
+double **DB=crear_matriz(me->dim,me->npe);
+double *flujo_elemento=crear_vector(me->dim);
+double detJ; 
+  for(int ele=0;ele<nelem;++ele){
+  //Coordenadas cartesianas y temperaturas de los nodos del elemento
+    for(int i=0;i<me->npe;++i){
+      nodo_actual=MC[ele][i+1]-1;
+      for(int j=0;j<me->dim;++j){
+        cci[j][i]=MN[nodo_actual][j];
+      }
+      temp_elemento[i]=Temperatura[nodo_actual];
+    }
+   // Propiedades del material
+    tmat=MC[ele][0]-1; 
+    for(int i=0;i<me->dim;++i){
+      D[i][i]=Mat[tmat][i]; //
+    }
+    
+    for(int p=0;p<me->npi1;++p){
+      calcularB(me,p,cci,&detJ,B);
+      matriz_mul(D,B,me->dim,me->dim,me->npe,DB);
+      matriz_vector_mul(DB,temp_elemento,me->dim,me->npe,flujo_elemento);
+      vector_escalar(-1.0,flujo_elemento,me->dim,flujo_elemento);
+      vector_copiar(flujo_elemento,me->dim,Flujos[ele*me->npi1+p]);/*Agregar a la matriz de 
+      los flujos (nelem*pi X dim)*/
+    }
+  }
+liberar_matriz(cci,me->dim);
+liberar_matriz(D,me->dim);
+liberar_matriz(B,me->dim);
+liberar_matriz(DB,me->dim);
 return(1);}
 
