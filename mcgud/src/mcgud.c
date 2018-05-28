@@ -1,4 +1,4 @@
-#include "femgud.h"
+#include "mcgud.h"
 
 void fabricarElemento(elemento *me){
   if(me->dim==1 && me->npe==2){
@@ -86,11 +86,14 @@ void E3D4N(elemento *me){
  *
  */
 double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN,double **Mat,
-    int ncond, double **cond,int ncondf,double **condf, double *f){
+    int ncond, double **cond,int ncondf,double **condf, double *f,
+    double **M, double **O){
   double **K=crear_matriz(nnodos,nnodos);
   double **Nt=crear_matriz(me->npe,1);// Derivadas naturales
   double **N=crear_matriz(1,me->npe);// Derivadas naturales
   double **ke=crear_matriz(me->npe, me->npe); //Matriz elemental
+  double **mme=crear_matriz(me->npe, me->npe); //Matriz elemental
+  double **oe=crear_matriz(me->npe, me->npe); //Matriz elemental
   double **aux1=crear_matriz(me->dim, me->npe); //Matriz elemental
   double **aux2=crear_matriz(me->npe, me->npe); //Matriz elemental
   double detj;//determinante del jacobiano 
@@ -121,10 +124,19 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
       //Calculo de B 
       calcularB(me,p,cci,&detj,B);
       matriz_transponer(B,me->npe,me->dim,Bt);// 
+      //Calculo de la matriz de rigidez elemental
       matriz_mul(D,B,me->dim,me->dim,me->npe,aux1);
       matriz_mul(Bt,aux1,me->npe,me->dim,me->npe,aux2);
       matriz_escalar(me->wi[p]*detj,aux2,me->npe,me->npe,aux2);
       matriz_suma(aux2,ke,me->npe,me->npe,ke);
+      matriz_transponer(N,me->npe,1,Nt);// 
+      matriz_mul(Nt,N,me->npe,1,me->npe,oe);
+      matriz_copiar(oe,me->npe,me->npe,mme);
+      //Calculo de la matriz de segundo sonido elemental 
+      matriz_escalar(1.0*detj*me->wi[p],mme,me->npe,me->npe,mme);
+      //Calculo de la matriz de primera derivada elemental
+      matriz_escalar(1.0*detj*me->wi[p],oe,me->npe,me->npe,oe);
+      /*Considerar el hecho de si el segundo sonido es matricial o no*/      
       //Calculo de f
       matriz_escalar(Q*detj*me->wi[p],N,1,me->npe,N);
     }
@@ -135,14 +147,20 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
       for(int j=0;j<me->npe;++j){
         e2=MC[ele][j+1]; 
         K[e1-1][e2-1]+=ke[i][j];
+        O[e1-1][e2-1]+=oe[i][j];
+        M[e1-1][e2-1]+=mme[i][j];
       }
       f[e1-1]+=N[0][i];
     }
     matriz_ceros(me->npe,me->npe,ke);
+    matriz_ceros(me->npe,me->npe,oe);
+    matriz_ceros(me->npe,me->npe,mme);
   }
-  condicionesFrontera(K,f,ncond,cond,ncondf,condf,nnodos,me);
+  //condicionesFrontera(K,f,ncond,cond,ncondf,condf,nnodos,me);
 liberar_matriz(cci,me->dim);
 liberar_matriz(ke,me->npe);
+liberar_matriz(mme,me->npe);
+liberar_matriz(oe,me->npe);
 liberar_matriz(B,me->dim);
 liberar_matriz(Bt,me->npe);
 liberar_matriz(D,me->dim);
@@ -268,4 +286,10 @@ liberar_matriz(D,me->dim);
 liberar_matriz(B,me->dim);
 liberar_matriz(DB,me->dim);
 return(1);}
+
+int MaxwellCatanneo(double **M, double **O, double **K, double *f, double dt){
+  
+
+return(1);}
+
 

@@ -1,5 +1,5 @@
-#ifndef FEMGUD_H
-#define FEMGUD_H 
+#ifndef MCGUD_H
+#define MCGUD_H 
 #include <stdio.h>
 #include <stdlib.h>
 #include "algebralineal.h"
@@ -25,7 +25,8 @@ void E2D4N(elemento *me);
 void E3D4N(elemento *me);
 //Matrices de rigidez y esfuerzos
 double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **MN,double **Mat,
-    int ncond, double **cond,int ncondf, double **condf ,double *f);
+    int ncond, double **cond,int ncondf, double **condf ,double *f,
+    double **M, double **O);
 int calcularB(elemento *me, int pi_actual, double **cci, double *detj,double **B);
 void condicionesFrontera(double **K, double *f,int ncond, double**cond,int ncondf,  
     double **condf,int nnodos,elemento *me);
