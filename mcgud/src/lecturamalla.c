@@ -5,8 +5,8 @@ void getParams(int argc, char *argv[], char *chivoin, char *chivoout){
   if(argc>2) strcpy(chivoout,argv[2]);
 }
 
-int datosMalla(char *chivoin, char* probname, char* soltype,double *tol,int *maxs, int *ndime,\
-int *npe, int *nelem){
+int datosMalla(char *chivoin, char* probname, char* soltype,double *tol,int *maxs, 
+    double *mtime,int *tinterval ,int *ndime,int *npe, int *nelem){
 FILE *f1=fopen(chivoin,"r");
 char buff[255]; 
 for(int i=0;i<5;i++){
@@ -21,6 +21,10 @@ for(int i=0;i<5;i++){
  fscanf(f1,"%lf",tol);
  fgets(buff,255,f1);fgets(buff,255,f1);
  fscanf(f1,"%d",maxs);
+ fgets(buff,255,f1);fgets(buff,255,f1);
+ fscanf(f1,"%lf",mtime);
+ fgets(buff,255,f1);fgets(buff,255,f1);
+ fscanf(f1,"%d",tinterval);
  fgets(buff,255,f1);fgets(buff,255,f1); fgets(buff,255,f1);
  fscanf(f1,"%d",ndime);
  fgets(buff,255,f1);fgets(buff,255,f1);
@@ -196,3 +200,47 @@ void resultados(char *problema,int nnodos, double *phi, int npi,int nelem,int pd
   fclose(f1);
 }
 
+double **CondicionInicialm2(char *chivoin, int *ncondm2){
+FILE *f1=fopen(chivoin,"r");
+char buff[255]; 
+int bufint; 
+double bufdbl; 
+while(strcmp(buff,"#Condicion inicial -2\n")!=0){
+  fgets(buff,255,f1);
+}
+fgets(buff,255,f1);
+fscanf(f1,"%d",ncondm2);
+//printf("%s\n",*ncondm2);
+if(*ncondm2==0) return(NULL); 
+  double **aux=(double**)malloc(*ncondm2*sizeof(double*));
+  for(int i=0;i<(*ncondm2);++i) aux[i]=(double*)malloc(2*sizeof(double));
+  fgets(buff,255,f1); fgets(buff,255,f1); fgets(buff,255,f1);
+  for(int i=0;i<(*ncondm2);++i){
+    fscanf(f1,"%lf",&aux[i][0]);
+    fscanf(f1,"%lf",&aux[i][1]);
+  }
+fclose(f1);
+
+return(aux);}
+
+double **CondicionInicialm1(char *chivoin, int *ncondm1){
+FILE *f1=fopen(chivoin,"r");
+char buff[255]; 
+int bufint; 
+double bufdbl; 
+while(strcmp(buff,"#Condicion inicial -1\n")!=0){
+  fgets(buff,255,f1);
+}
+fgets(buff,255,f1);
+fscanf(f1,"%d",ncondm1);
+if(*ncondm1==0) return(NULL); 
+  double **aux=(double**)malloc(*ncondm1*sizeof(double*));
+  for(int i=0;i<(*ncondm1);++i) aux[i]=(double*)malloc(2*sizeof(double));
+  fgets(buff,255,f1); fgets(buff,255,f1); fgets(buff,255,f1);
+  for(int i=0;i<(*ncondm1);++i){
+    fscanf(f1,"%lf",&aux[i][0]);
+    fscanf(f1,"%lf",&aux[i][1]);
+  }
+fclose(f1);
+
+return(aux);}

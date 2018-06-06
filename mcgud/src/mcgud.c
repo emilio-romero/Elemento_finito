@@ -133,7 +133,7 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
       matriz_mul(Nt,N,me->npe,1,me->npe,oe);
       matriz_copiar(oe,me->npe,me->npe,mme);
       //Calculo de la matriz de segundo sonido elemental 
-      matriz_escalar(1.0*detj*me->wi[p],mme,me->npe,me->npe,mme);
+      matriz_escalar(0.1*detj*me->wi[p],mme,me->npe,me->npe,mme);
       //Calculo de la matriz de primera derivada elemental
       matriz_escalar(1.0*detj*me->wi[p],oe,me->npe,me->npe,oe);
       /*Considerar el hecho de si el segundo sonido es matricial o no*/      
@@ -156,7 +156,6 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
     matriz_ceros(me->npe,me->npe,oe);
     matriz_ceros(me->npe,me->npe,mme);
   }
-  //condicionesFrontera(K,f,ncond,cond,ncondf,condf,nnodos,me);
 liberar_matriz(cci,me->dim);
 liberar_matriz(ke,me->npe);
 liberar_matriz(mme,me->npe);
@@ -287,9 +286,109 @@ liberar_matriz(B,me->dim);
 liberar_matriz(DB,me->dim);
 return(1);}
 
-int MaxwellCatanneo(double **M, double **O, double **K, double *f, double dt){
-  
+int MaxwellCatanneo(double **M, double **O, double **K, double *f,int nnodos, double mtime,
+    int tinterval,int nelem ,int **MC,double **MN,int ncndm1, double **mcondm1,
+    int ncndm2, double **mcondm2,
+    int ncond, double **cond,
+    elemento *me, char *problema){
+  double dt=mtime/((double)(tinterval));
+double **Matt=crear_matriz(nnodos,nnodos);
+double **Mattm1=crear_matriz(nnodos,nnodos);
+double **Mattm2=crear_matriz(nnodos,nnodos);
+double *rhs=crear_vector(nnodos);
+double *vm1=crear_vector(nnodos);
+double *vm2=crear_vector(nnodos);
+double *auxm1=crear_vector(nnodos);
+double *auxm2=crear_vector(nnodos);
+double *sol=crear_vector(nnodos);
+/*Preparacion de las matrices*/
+matriz_escalar(1.0/(dt*dt),M,nnodos,nnodos,M);
+matriz_escalar(1.0/(dt),O,nnodos,nnodos,O);
+matriz_suma(Matt,M,nnodos,nnodos,Matt);
+matriz_suma(Matt,O,nnodos,nnodos,Matt);
+matriz_suma(Matt,K,nnodos,nnodos,Matt);
+matriz_escalar(2.0,M,nnodos,nnodos,M);
+matriz_suma(Mattm1,M,nnodos,nnodos,Mattm1);
+matriz_suma(Mattm1,O,nnodos,nnodos,Mattm1);
+matriz_escalar(0.5,M,nnodos,nnodos,M);
+matriz_copiar(M,nnodos,nnodos,Mattm2);
+/*Fin de preparacion de las matrices*/
+/*Aplicacion de condiciones de frontera y condiciones iniciales*/
+  //condicionesFrontera1(Matt,f,ncond,cond,nnodos,me);
+  //condicionesFrontera1(Mattm1,f,ncond,cond,nnodos,me);
+  //condicionesFrontera1(Mattm2,f,ncond,cond,nnodos,me);
 
+/*Fin de condiciones de frontera*/
+  FILE *f1=fopen(problema,"w");
+  fprintf(f1,"GiD Post Result File 1.0\n \n");
+/*Aplicacion de condiciones iniciales*/
+  int nodo_actual; 
+  for(int i=0;i<ncndm1;++i){
+    nodo_actual=(int)mcondm1[i][0];
+    vm1[nodo_actual]=mcondm1[i][1];
+    //printf("%lf ",vm1[nodo_actual]);
+  }
+  for(int i=0;i<ncndm2;++i){
+    nodo_actual=(int)mcondm2[i][0];
+    vm2[nodo_actual]=mcondm2[i][1];
+  }
+  fprintf(f1,"Result \"Temperature\" \"MC\" %d Scalar OnNodes\n",0);
+    fprintf(f1,"Values\n");
+    for(int i=0;i<nnodos;++i){
+      fprintf(f1,"%d %E\n",i+1,vm2[i]);
+    }
+    fprintf(f1,"End Values\n");
+  fprintf(f1,"Result \"Temperature\" \"MC\" %d Scalar OnNodes\n",1);
+    fprintf(f1,"Values\n");
+    for(int i=0;i<nnodos;++i){
+      fprintf(f1,"%d %E\n",i+1,vm1[i]);
+      //printf("%E ",vm1[i]);
+    }
+    fprintf(f1,"End Values\n");
+/*Fin de condiciones iniciales*/
+
+/*METODO*/
+  for(int t=0;t<tinterval;++t){
+    matriz_vector_mul(Mattm1,vm1,nnodos,nnodos,auxm1);
+    matriz_vector_mul(Mattm2,vm2,nnodos,nnodos,auxm2);
+    vector_suma(rhs,f,nnodos,rhs);
+    vector_suma(rhs,auxm1,nnodos,rhs);
+    vector_resta(rhs,auxm2,nnodos,rhs);
+  condicionesFrontera1(Matt,rhs,ncond,cond,nnodos,me);
+    solLL(Matt,rhs,nnodos,nnodos,sol);
+    fprintf(f1,"Result \"Temperature\" \"MC\" %d Scalar OnNodes\n",t+2);
+    fprintf(f1,"Values\n");
+    for(int i=0;i<nnodos;++i){
+      fprintf(f1,"%d %E\n",i+1,sol[i]);
+    }
+    fprintf(f1,"End Values\n");
+    vector_copiar(vm1,nnodos,vm2);
+    vector_copiar(sol,nnodos,vm1);
+  }
+  fclose(f1);
+/*FIN METODO*/
+
+
+liberar_matriz(Matt,nnodos);
+liberar_matriz(Mattm1,nnodos);
+liberar_matriz(Mattm2,nnodos);
+free(rhs);free(vm1); free(vm2);
 return(1);}
+
+void condicionesFrontera1(double **K,double *f,int ncond ,double **cond,int nnodos, elemento *me){
+  int nodo_actual; 
+  int n1,n2; 
+  for(int e=0;e<ncond;++e){
+    nodo_actual=(int)cond[e][0]-1;
+    for(int i=0;i<nnodos;++i){
+      if(fabs(K[i][nodo_actual])>0 && i!=nodo_actual){
+        f[i]=f[i]-K[i][nodo_actual]*cond[e][1];
+        K[i][nodo_actual]=K[nodo_actual][i]=0.0;
+      } 
+    }
+    K[nodo_actual][nodo_actual]=1.0; 
+    f[nodo_actual]=cond[e][1]; 
+  } 
+}
 
 

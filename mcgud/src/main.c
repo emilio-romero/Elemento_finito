@@ -13,9 +13,10 @@ elemento e1;
 */
 char problem[50], solucionador[30]; 
 double tol; 
-int maxiter, dim, npe, nelem,nnodos,ncond,nmat; 
+int maxiter, dim, npe, nelem,nnodos,ncond,nmat,tinterval;
+double mtime; 
 printf("...........\n Se leera el archivo: %s \n..............\n",ain);
-datosMalla(ain,problem,solucionador,&tol,&maxiter,&dim,&npe,&nelem);
+datosMalla(ain,problem,solucionador,&tol,&maxiter,&mtime,&tinterval,&dim,&npe,&nelem);
 
 int **mc=matrizConectividad(ain,npe,nelem);
   printf("Se leyo matriz de conectividad...\n");
@@ -28,7 +29,10 @@ int ncondf;
 double **condf=matrizCondicionesF(ain,&ncondf);
   printf("Se leyeron condiciones de frontera...\n");
 e1.dim=dim; e1.npe=npe;
-
+int ncondm2,ncondm1; 
+double **condm2=CondicionInicialm2(ain,&ncondm2);
+double **condm1=CondicionInicialm1(ain,&ncondm1);
+  printf("Se leyeron condiciones iniciales...\n");
 fabricarElemento(&e1);
 printf("Se creo el elemento...\n");
 
@@ -44,16 +48,18 @@ double *phi=crear_vector(nnodos);
 printf("Se empezara la solucion del problema\n");
 if(strcmp(solucionador,"Conjugate_gradient")==0){
   printf("Resolvere con CG\n");
-  GradienteConjugado(k,f,nnodos,nnodos,tol,phi);
+  //GradienteConjugado(k,f,nnodos,nnodos,tol,phi);
 }else{
   printf("Resolvere con Cholesky\n"); 
-  solLL(k,f,nnodos,nnodos,phi);
+  //solLL(k,f,nnodos,nnodos,phi);
+  MaxwellCatanneo(m,o,k,f,nnodos,mtime,tinterval,nelem,mc,mn,ncondm1,condm1,ncondm2,condm2,
+      ncond,cond,&e1,aout);
 }
-double **Flux=crear_matriz(nelem*e1.npi1,e1.dim);
-printf("Se calcularan los flujos\n");
-calcularFlujos(&e1,nnodos,nelem,mc,mn,mat,phi,Flux);
+//double **Flux=crear_matriz(nelem*e1.npi1,e1.dim);
+//printf("Se calcularan los flujos\n");
+//calcularFlujos(&e1,nnodos,nelem,mc,mn,mat,phi,Flux);
 printf("...........\n Se escribira el archivo: %s \n..............\n",aout);
-resultados(aout,nnodos,phi,e1.npi1,nelem,e1.dim,e1.npe,Flux);
+//resultados(aout,nnodos,phi,e1.npi1,nelem,e1.dim,e1.npe,Flux);
 /*Liberacion de memoria*/
 printf("Liberando memoria... \n");
 for(int i=0;i<nelem;++i) free(mc[i]); 
@@ -61,7 +67,7 @@ free(mc);
 liberar_matriz(mn,nnodos);
 liberar_matriz(mat,nmat);
 liberar_matriz(cond,ncond);
-liberar_matriz(Flux,nelem*e1.npi1);
+//liberar_matriz(Flux,nelem*e1.npi1);
 free(phi);
 liberar_matriz(k,nnodos);
 liberar_matriz(m,nnodos);

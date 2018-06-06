@@ -30,7 +30,13 @@ double **matrizRigidez(elemento *me, int nnodos, int nelem, int **MC, double **M
 int calcularB(elemento *me, int pi_actual, double **cci, double *detj,double **B);
 void condicionesFrontera(double **K, double *f,int ncond, double**cond,int ncondf,  
     double **condf,int nnodos,elemento *me);
+void condicionesFrontera1(double **K, double *f,int ncond, double**cond,int nnodos,elemento *me);
 void invJacobian(double **Jacobian, elemento *me,double *detJ ,double **invJ);
 int calcularFlujos(elemento *me, int nnodos, int nelem, int **MC, double **MN, double **Mat,
     double *Temperatura, double **Flujos);
+int MaxwellCatanneo(double **M, double **O, double **K, double *f,int nnodos, double mtime,
+    int tinterval,int nelem ,int **MC,double **MN,int ncndm1, double **mcondm1,
+    int ncndm2, double **mcondm2,
+    int ncond, double **cond,
+    elemento *me, char *problema);
 #endif
